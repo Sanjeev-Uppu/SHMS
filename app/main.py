@@ -4,6 +4,7 @@ from app.routes.notification_routes import router as notification_router
 from app.routes.auth_routes import router as auth_router
 from app.routes.patient_routes import router as patient_router
 from app.routes.dashboard_routes import router as dashboard_router
+from app.routes.prescription_routes import router as prescription_router
 
 app = FastAPI(title="SHMS Backend Sprint 1")
 
@@ -18,6 +19,11 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(patient_router, prefix="/api/v1/patients", tags=["Patients"])
 app.include_router(dashboard_router, prefix="/api/v1/dashboard", tags=["Dashboard"])
+app.include_router(
+    prescription_router,
+    prefix="/api/v1",
+    tags=["Prescriptions"]
+)
 
 @app.get("/")
 def home():
