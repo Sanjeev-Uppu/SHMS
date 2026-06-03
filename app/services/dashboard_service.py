@@ -1,7 +1,13 @@
 from app.database.supabase_client import supabase
 
-def get_dashboard_data():
-    patients = supabase.table("patients").select("*").execute()
+
+def get_dashboard_data(email):
+    patients = (
+        supabase.table("patients")
+        .select("*")
+        .eq("doctor_email", email)
+        .execute()
+    )
 
     return {
         "total_patients": len(patients.data),

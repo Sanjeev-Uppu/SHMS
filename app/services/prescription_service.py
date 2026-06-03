@@ -1,12 +1,14 @@
 from app.database.supabase_client import supabase
 
+
 # CREATE PRESCRIPTION
-def create_prescription(data):
+def create_prescription(data, email):
 
     prescription_data = {
         "patient_mobile": data.patient_mobile,
         "doctor_name": data.doctor_name,
-        "notes": data.notes
+        "notes": data.notes,
+        "doctor_email": email
     }
 
     prescription = (
@@ -38,12 +40,13 @@ def create_prescription(data):
 
 
 # GET ALL PRESCRIPTIONS
-def get_all_prescriptions():
+def get_all_prescriptions(email):
 
     result = (
         supabase
         .table("prescriptions")
         .select("*")
+        .eq("doctor_email", email)
         .execute()
     )
 
@@ -51,14 +54,14 @@ def get_all_prescriptions():
 
 
 # GET PRESCRIPTION BY ID
-# GET PRESCRIPTION BY ID
-def get_prescription(id):
+def get_prescription(id, email):
 
     prescription = (
         supabase
         .table("prescriptions")
         .select("*")
         .eq("id", id)
+        .eq("doctor_email", email)
         .single()
         .execute()
     )
@@ -76,6 +79,7 @@ def get_prescription(id):
         "medicines": medicines.data
     }
 
+
 # UPDATE MEDICINE
 def update_medicine(item_id, data):
 
@@ -90,30 +94,30 @@ def update_medicine(item_id, data):
     return result.data
 
 
-def update_prescription(id, data):
+# UPDATE PRESCRIPTION
+def update_prescription(id, data, email):
 
     prescription_data = {
         "doctor_name": data.doctor_name,
         "notes": data.notes
     }
 
-    # Update prescription details
     supabase.table(
         "prescriptions"
     ).update(
         prescription_data
     ).eq(
         "id", id
+    ).eq(
+        "doctor_email", email
     ).execute()
 
-    # Delete old medicines
     supabase.table(
         "prescription_items"
     ).delete().eq(
         "prescription_id", id
     ).execute()
 
-    # Insert updated medicines
     medicines = []
 
     for med in data.medicines:
@@ -132,7 +136,6 @@ def update_prescription(id, data):
     }
 
 
-
 # DELETE MEDICINE
 def delete_medicine(item_id):
 
@@ -148,13 +151,14 @@ def delete_medicine(item_id):
 
 
 # DELETE PRESCRIPTION
-def delete_prescription(id):
+def delete_prescription(id, email):
 
     result = (
         supabase
         .table("prescriptions")
         .delete()
         .eq("id", id)
+        .eq("doctor_email", email)
         .execute()
     )
 
