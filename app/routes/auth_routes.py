@@ -7,6 +7,9 @@ from app.database.supabase_client import supabase
 router = APIRouter()
 
 
+
+
+
 @router.post("/signup")
 def signup(data: SignupSchema):
     return signup_user(data)

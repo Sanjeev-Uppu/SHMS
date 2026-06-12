@@ -7,17 +7,19 @@ from app.routes.patient_routes import router as patient_router
 from app.routes.dashboard_routes import router as dashboard_router
 from app.routes.prescription_routes import router as prescription_router
 
-from app.services.scheduler_service import start_scheduler
+from app.routes.consultation_routes import router as consultation_router
+
+ 
 
 from app.services.whatsapp_service import send_whatsapp_message
 
+from app.routes.reminder_routes import router as reminder_router
+
+ 
 app = FastAPI(title="SHMS Backend Sprint 2")
 
 
-@app.on_event("startup")
-async def startup_event():
-    start_scheduler()
-    print("Reminder Scheduler Started Successfully")
+ 
 
 
 app.add_middleware(
@@ -63,7 +65,14 @@ app.include_router(
     tags=["Notifications"]
 )
 
+app.include_router(
+    consultation_router,
+    prefix="/api/v1"
+)
 
+app.include_router(
+    reminder_router
+)
  
 
 @app.get("/test-whatsapp")

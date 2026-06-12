@@ -1,4 +1,7 @@
 from pydantic import BaseModel
+from typing import Optional
+from datetime import date
+
 
 class PatientSchema(BaseModel):
     patient_name: str
@@ -14,3 +17,6 @@ class PatientSchema(BaseModel):
     diagnosis: str
     allergies: str
     address: str
+
+    # Optional follow-up consultation date
+    next_consultation_date: Optional[date] = None

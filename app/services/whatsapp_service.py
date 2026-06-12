@@ -25,14 +25,17 @@ def send_whatsapp_message(
     }
 
     message = f"""
-🏥 SHMS Medicine Reminder
+🏥 *SHMS Hospital - Medicine Reminder*
 
-Medicine: {medicine_name}
-Timing: {timing}
+Dear Patient,
+
+💊 *Medicine:* {medicine_name}
+
+⏰ *Timing:* {timing}
 
 Please take your medicine as prescribed by your doctor.
 
-Stay healthy ❤️
+*SHMS Hospital Team* ❤️
 """
 
     payload = {
@@ -54,6 +57,64 @@ Stay healthy ❤️
         f"WhatsApp Status: {response.status_code}"
     )
 
-    print(
-        response.text
+    print(response.text)
+
+
+def send_consultation_reminder(
+    mobile,
+    patient_name,
+    consultation_date
+):
+
+    url = (
+        f"https://graph.facebook.com/v23.0/"
+        f"{WHATSAPP_PHONE_NUMBER_ID}/messages"
     )
+
+    headers = {
+        "Authorization":
+            f"Bearer {WHATSAPP_ACCESS_TOKEN}",
+        "Content-Type":
+            "application/json"
+    }
+
+    message = f"""
+🏥 *SHMS Hospital - Consultation Reminder*
+
+Dear *{patient_name}*,
+
+📅 *Follow-up Consultation Date:*
+{consultation_date}
+
+Your doctor has scheduled a follow-up consultation for tomorrow.
+
+Please reply with:
+
+✅ *1* - I will come
+❌ *2* - My health is good
+
+If you choose *2*, your follow-up appointment will be cancelled automatically.
+
+*SHMS Hospital Team* ❤️
+"""
+
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": mobile,
+        "type": "text",
+        "text": {
+            "body": message
+        }
+    }
+
+    response = requests.post(
+        url,
+        headers=headers,
+        json=payload
+    )
+
+    print(
+        f"Consultation WhatsApp Status: {response.status_code}"
+    )
+
+    print(response.text)
