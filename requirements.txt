@@ -10,3 +10,4 @@ email-validator==2.2.0
 slowapi==0.1.9
 python-multipart==0.0.9
 apscheduler
+fastapi-mail==1.4.1

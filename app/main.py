@@ -9,6 +9,7 @@ from app.routes.prescription_routes import router as prescription_router
 
 from app.routes.consultation_routes import router as consultation_router
 
+from app.routes.search import router as search_router
  
 
 from app.services.whatsapp_service import send_whatsapp_message
@@ -24,7 +25,7 @@ app = FastAPI(title="SHMS Backend Sprint 2")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -75,6 +76,11 @@ app.include_router(
 )
  
 
+app.include_router(
+    auth_router,
+    prefix="/api/v1/auth"
+)
+
 @app.get("/test-whatsapp")
 def test_whatsapp():
 
@@ -87,6 +93,12 @@ def test_whatsapp():
     return {
         "message": "WhatsApp Sent"
     }
+
+app.include_router(
+    search_router,
+    prefix="/api/v1",
+    tags=["Search"]
+)
 @app.get("/")
 def home():
     return {

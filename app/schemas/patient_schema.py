@@ -18,5 +18,6 @@ class PatientSchema(BaseModel):
     allergies: str
     address: str
 
-    # Optional follow-up consultation date
     next_consultation_date: Optional[date] = None
+
+    appointment_status: Optional[str] = "PENDING"

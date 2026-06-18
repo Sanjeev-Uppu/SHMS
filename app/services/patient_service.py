@@ -2,8 +2,13 @@ from app.database.supabase_client import supabase
 
 
 def create_patient(data, email):
+
     patient_data = data.model_dump(mode="json")
+
     patient_data["doctor_email"] = email
+
+    if patient_data.get("next_consultation_date"):
+        patient_data["appointment_status"] = "PENDING"
 
     result = (
         supabase
@@ -13,7 +18,6 @@ def create_patient(data, email):
     )
 
     return result.data
-
 
 def get_all_patients(email):
     result = (
@@ -34,6 +38,8 @@ def get_patient_by_mobile(mobile, email):
         .execute()
     )
     return result.data
+
+
 
 
 def update_patient(mobile, data, email):

@@ -11,6 +11,10 @@ router = APIRouter(
 )
 
 
+# ==========================================
+# PROTECTED ROUTES (Frontend)
+# ==========================================
+
 @router.get("/today")
 def get_today_consultations(
     email: str = Depends(get_current_user)
@@ -73,33 +77,75 @@ def get_upcoming_consultations(
     return result.data
 
 
+# ==========================================
+# PUBLIC ROUTES (n8n)
+# ==========================================
+
+@router.get("/tomorrow-public")
+def get_tomorrow_consultations_public():
+
+    tomorrow = (
+        date.today() + timedelta(days=1)
+    ).isoformat()
+
+    result = (
+        supabase
+        .table("patients")
+        .select("*")
+        .eq(
+            "next_consultation_date",
+            tomorrow
+        )
+        .execute()
+    )
+
+    return result.data
+
+
+@router.get("/upcoming-public")
+def get_upcoming_consultations_public():
+
+    today = date.today().isoformat()
+
+    result = (
+        supabase
+        .table("patients")
+        .select("*")
+        .gte(
+            "next_consultation_date",
+            today
+        )
+        .order(
+            "next_consultation_date"
+        )
+        .execute()
+    )
+
+    return result.data
+
+
+# ==========================================
+# WHATSAPP RESPONSE HANDLER
+# ==========================================
 @router.post("/respond")
 def consultation_response(
     data: ConsultationResponseSchema
 ):
-    print("Raw Mobile:", data.mobile_number)
-    print("Raw Mobile Repr:", repr(data.mobile_number))
-    print("Response:", data.response)
 
-    mobile = str(data.mobile_number).strip()
+    mobile = str(
+        data.mobile_number
+    ).strip()
 
-    # Take last 10 digits
     if len(mobile) > 10:
         mobile = mobile[-10:]
 
-    print("DB Mobile:", mobile)
-
-    patient = (
-        supabase
-        .table("patients")
-        .select("*")
-        .eq("mobile_number", mobile)
-        .execute()
+    response = (
+        data.response
+        .upper()
+        .strip()
     )
 
-    print("Patient Found:", patient.data)
-
-    response = data.response.upper().strip()
+    # CANCEL
 
     if response in ["NO", "2"]:
 
@@ -107,29 +153,49 @@ def consultation_response(
             supabase
             .table("patients")
             .update({
-                "next_consultation_date": None
+                "next_consultation_date": None,
+                "appointment_status": "CANCELLED"
             })
-            .eq("mobile_number", mobile)
+            .eq(
+                "mobile_number",
+                mobile
+            )
             .execute()
         )
 
-        print("Update Result:", result.data)
-
         return {
-            "message": "Consultation cancelled",
-            "received_mobile": data.mobile_number,
-            "db_mobile": mobile,
-            "data": result.data
+            "message":
+            "Consultation cancelled",
+            "data":
+            result.data
         }
+
+    # CONFIRM
 
     elif response in ["YES", "1"]:
 
+        result = (
+            supabase
+            .table("patients")
+            .update({
+                "appointment_status":
+                "CONFIRMED"
+            })
+            .eq(
+                "mobile_number",
+                mobile
+            )
+            .execute()
+        )
+
         return {
-            "message": "Appointment confirmed",
-            "received_mobile": data.mobile_number,
-            "db_mobile": mobile
+            "message":
+            "Appointment confirmed",
+            "data":
+            result.data
         }
 
     return {
-        "message": "Invalid response. Use YES/NO or 1/2"
-    } 
+        "message":
+        "Invalid response"
+    }
