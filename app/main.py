@@ -12,7 +12,7 @@ from app.routes.consultation_routes import router as consultation_router
 from app.routes.search import router as search_router
  
 
-from app.services.whatsapp_service import send_whatsapp_message
+ 
 
 from app.routes.reminder_routes import router as reminder_router
 
